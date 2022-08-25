@@ -31,7 +31,13 @@ def create_app():
     # <name> into the following function
     @app.route("/user/<name>")
     def user(name=None):
-        print(f"name is {name}")
+        user = User.query.filter(User.username == name).one()
+        return render_template(
+            "user.html",
+            title=name,
+            message=f"{user} tweets:",
+            tweets=user.tweets,
+        )
 
     # This changes the method from GET to POST for info submission/upload
     @app.route("/user", methods=["POST"])
