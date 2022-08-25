@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
-import os
+
+# import os
 from twitoff.predict import predict
 from twitoff.models import DB, User, Tweet
 from twitoff.twitter import add_or_update_user
@@ -9,7 +10,7 @@ def create_app():
     app = Flask(__name__)
 
     # Configure database
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     DB.init_app(app)
