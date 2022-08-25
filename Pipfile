@@ -12,6 +12,7 @@ tweepy = "*"
 python-dotenv = "*"
 scikit-learn = "*"
 numpy = "*"
+gunicorn = "*"
 
 [dev-packages]
 flake8 = "*"
