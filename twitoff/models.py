@@ -6,6 +6,7 @@ DB = SQLAlchemy()
 class User(DB.Model):
     id = DB.Column(DB.BigInteger, primary_key=True)
     username = DB.Column(DB.String, nullable=True)
+    newest_tweet = DB.Column(DB.BigInteger)
 
     def __repr__(self) -> str:
         return f"<User: {self.username}>"
@@ -14,6 +15,7 @@ class User(DB.Model):
 class Tweet(DB.Model):
     id = DB.Column(DB.BigInteger, primary_key=True)
     text = DB.Column(DB.Unicode(300))
+    vector = DB.Column(DB.PickleType, nullable=False)
     user_id = DB.Column(
         DB.BigInteger, DB.ForeignKey("user.id"), nullable=False
     )

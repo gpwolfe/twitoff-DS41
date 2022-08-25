@@ -1,6 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import os
+from twitoff.predict import predict
 from twitoff.models import DB, User, Tweet
+from twitoff.twitter import add_or_update_user
 
 
 def create_app():
@@ -24,9 +26,38 @@ def create_app():
     def test():
         return f"<p>Another {app_title} page</p>"
 
-    @app.route("/hola")
-    def hola():
-        return "Hola, Twitoff!"
+    # The <> allows flask to parse the URL, where it will pass
+    # <name> into the following function
+    @app.route("/user/<name>")
+    def user(name=None):
+        print(f"name is {name}")
+
+    # This changes the method from GET to POST for info submission/upload
+    @app.route("/user", methods=["POST"])
+    def add_user():
+        # The key values come from the base.html in this case
+        username = request.values["user_name"]
+        add_or_update_user(username)
+        # Here we return a web page, adding in necessary info according
+        #  to user.html
+        user = User.query.filter(User.username == username).one()
+        return render_template(
+            "user.html",
+            title=username,
+            message="User added successfully",
+            tweets=user.tweets,
+        )
+
+    @app.route("/update")
+    def update():
+        users = User.query.all()
+        for user in users:
+            add_or_update_user(user.username)
+        return """Users have been updated
+        <a href='/'>Go to Home</a>
+        <a href='/reset'>Go to Reset</a>
+        <a href='/update'>Go to Update</a>
+        """
 
     @app.route("/reset")
     def reset():
@@ -35,7 +66,7 @@ def create_app():
         return """The DB has been reset
         <a href='/'>Go to Home</a>
         <a href='/reset'>Go to Reset</a>
-        <a href='/populate'>Go to Populate</a>
+        <a href='/update'>Go to Update</a>
         """
 
     @app.route("/populate")
@@ -58,5 +89,25 @@ def create_app():
             <a href='/reset'>Go to Reset</a>
             <a href='/populate'>Go to Populate</a>
             """
+
+    @app.route("/compare", methods=["POST"])
+    def compare():
+        username0 = request.values["user0"]
+        username1 = request.values["user1"]
+        hypo_text_tweet = request.values["tweet_text"]
+
+        if username0 == username1:
+            message = "Cannot compare a user to themselves"
+        else:
+
+            prediction = predict(username0, username1, hypo_text_tweet)
+            if prediction:
+                predicted_user = username1
+            else:
+                predicted_user = username0
+            message = f"This tweet was more likely written by {predicted_user}"
+        return render_template(
+            "prediction.html", title="Prediction", message=message
+        )
 
     return app
