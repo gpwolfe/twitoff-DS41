@@ -108,7 +108,7 @@ def create_app():
         else:
 
             prediction = predict(username0, username1, hypo_text_tweet)
-            if prediction:
+            if prediction > 0.5:
                 predicted_user = username1
             else:
                 predicted_user = username0
